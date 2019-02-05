@@ -137,7 +137,7 @@ void optimize(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& 
 			}
 			--num_unused;
 		}
-		used = { false };	//reset, get ready to do again for next starting node
+		fill(used.begin(), used.end(), false);	//reset, get ready to do again for next starting node
 	}
 }
 
