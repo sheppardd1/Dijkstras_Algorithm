@@ -22,19 +22,25 @@ void init_distances(vector<map<size_t, float>>&, const size_t );
 void get_distances(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
 size_t get_min_unused_index(size_t, vector<bool>, vector<map<size_t, float>>&);
 void optimize(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
+void Dijkstra(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names);
 
 int main()
 {
 
 	vector <string> node_names;
 	size_t count = 0;
-	vector<map<size_t, float>> distance;			//user-inputted direct distances between nodes
-	vector<map<size_t, float>> optimized_distance;
 	// If distance from node A to C is 3, then distance[0] will contain a map with the points (2,3) because node C is represented by 2, the distance is 3, and the start is A which is representd by 0.
 
 	get_names(node_names, count);
 
 	cout << "Total number of nodes: " << count << endl;
+
+	vector<map<size_t, float> > distance(count);			//user-inputted direct distances between nodes
+	vector<map<size_t, float> > optimized_distance(count);
+
+	get_distances(distance, optimized_distance, count, node_names);
+
+	Dijkstra(distance, optimized_distance, count, node_names);
 
 	// wait for user to press ENTER before exiting
 	cin.get();
@@ -115,9 +121,11 @@ void optimize(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& 
 	optimized_distance = distance;
 	vector <bool> used(count,false);
 	size_t num_unused, key;
+	num_unused = count;
 
 	for (size_t i = 0; i < count; ++i) {
 		used[i] = true;
+		--num_unused;
 		while (num_unused > 0) {
 			key = get_min_unused_index(count, used, optimized_distance);
 			used[key] = true;
@@ -127,6 +135,7 @@ void optimize(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& 
 					optimized_distance[i].insert(pair <size_t, float>(j, sum));
 				}
 			}
+			--num_unused;
 		}
 		used = { false };	//reset, get ready to do again for next starting node
 	}
@@ -153,3 +162,14 @@ bool is_float( const string &input) {
 	float new_float;
 	return !((sstr >> noskipws >> new_float).rdstate() ^ ios_base::eofbit);
 } 
+
+void Dijkstra(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names) {
+	
+	optimize(distance, optimized_distance, count, node_names);
+	cout << "Final results: \n";
+	for (size_t i = 0; i < count; ++i) {
+		for (size_t j = 0; j < count; ++j) {
+			cout << " From \"" << node_names[i] << "\' to \"" << node_names[j] << "'\": " << optimized_distance[i].find(j)->second << '\n';
+		}
+	}
+}
