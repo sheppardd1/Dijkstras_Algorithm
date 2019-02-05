@@ -10,6 +10,7 @@ using namespace std;   // Allows all standard library items to be used
 
 int main()
 {
+
 	size_t count = 0;
 	vector <string> node_names;
 	string name;
