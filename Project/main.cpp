@@ -1,5 +1,3 @@
-
-
 #include "stdafx.h"
 #include <iostream>    // Provides cout
 #include <cstdlib>     // Provides EXIT_SUCCESS
@@ -20,9 +18,9 @@ void get_names(vector<string>&, size_t&);
 bool is_float(const string &input);
 void init_distances(vector<map<size_t, float>>&, const size_t );
 void get_distances(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
-size_t get_min_unused_index(size_t, vector<bool>, vector<map<size_t, float>>&);
+size_t get_min_unused_index(size_t, vector<bool>, vector<map<size_t, float>>&, size_t);
 void optimize(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
-void Dijkstra(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names);
+void Dijkstra(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
 
 int main()
 {
@@ -69,15 +67,20 @@ void get_names(vector<string>& node_names, size_t& count) {
 
 void init_distances(vector<map<size_t, float>>& distance, const size_t count) {
 	// essentially creating a square matrix (like multiplication table)
+
+	map<size_t, float> tempMap;
+
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = 0; j < count; ++j) {
 			if (i == j) {
-				distance[i].insert(pair<size_t, float>(j, 0));	// init distance from node to itself to 0
+				tempMap.insert(pair<size_t, float>(j, 0));	// init distance from node to itself to 0
 			}
 			else {
-				distance[i].insert(pair<size_t, float>(j,INFTY));	// init all distance combinations to infty, except when the node matches with itself (i.e. distance from node to itself = 0)
+				tempMap.insert(pair<size_t, float>(j,INFTY));	// init all distance combinations to infty, except when the node matches with itself (i.e. distance from node to itself = 0)
 			}
 		}
+		distance[i] = tempMap;
+		tempMap.clear();
 	}
 }
 
@@ -91,6 +94,8 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 	init_distances(distance, count);
 	//init_distances(optimized_distance, count);
 
+	map<size_t, float> tempMap;
+
 
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = 0; j < count; ++j) {
@@ -101,51 +106,65 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 					//check for validity
 					if (is_float(current_distance)) {
 						current_distance_float = stof(current_distance);
-						distance[i].insert(pair<size_t, float>(j, current_distance_float));
-						valid = true;
+						if (current_distance_float >= 0) {
+							tempMap.insert(pair<size_t, float>(j, current_distance_float));
+							valid = true;
+						}
+						else {
+							valid = false;
+							cout << "ERROR - Value cannot be negative. Try again.\n";
+						}
 					}
 					else if (current_distance != "infinity" && current_distance != "inf") {
 						valid = false;
-						cout << "Not a valid value. Enter a numerical value or \'inf\' or \'infinity\' for no connection\n";
+						cout << "ERROR - Not a valid value. Enter a numerical value or \'inf\' or \'infinity\' for no connection. Try again.\n";
 					}
 					//else distance = infinity which is the already-initialized value, so do nothing for that
 				} while (!valid);
 			}
-			
+			distance[i] = tempMap;
 		}
 	}
 }
 
 void optimize(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names) {
-	map<size_t, float>::iterator itr;
+	//map<size_t, float>::iterator itr;
 	optimized_distance = distance;
 	vector <bool> used(count,false);
 	size_t num_unused, key;
-	num_unused = count;
+	map<size_t, float> tempMap;
 
-	for (size_t i = 0; i < count; ++i) {
+	for (size_t i = 0; i < count; ++i) {	//loop for node variable as starting node(?)
+		tempMap = optimized_distance[i];
 		used[i] = true;
-		--num_unused;
-		while (num_unused > 0) {
-			key = get_min_unused_index(count, used, optimized_distance);
+		num_unused = count-1;
+		while (num_unused > 0) {	// test
+			key = get_min_unused_index(count, used, optimized_distance, i);
 			used[key] = true;
 			for (size_t j = 0; j < count; ++j) {
-				float sum = optimized_distance[i].find(key)->second + optimized_distance[key].find(j)->second;
-				if (!used[j] && (sum < optimized_distance[i].find(j)->second)) {
-					optimized_distance[i].insert(pair <size_t, float>(j, sum));
+				float sum = tempMap.find(key)->second + tempMap.find(j)->second;
+				if (!used[j] && (sum < tempMap.find(j)->second)) {
+					tempMap.insert(pair <size_t, float>(j, sum));
 				}
 			}
 			--num_unused;
 		}
+		optimized_distance[i].clear();
+		optimized_distance[i] = tempMap;
 		fill(used.begin(), used.end(), false);	//reset, get ready to do again for next starting node
 	}
 }
 
-size_t get_min_unused_index(size_t count, vector<bool> used, vector<map<size_t, float>>& optimized_distance) {
+size_t get_min_unused_index(size_t count, vector<bool> used, vector<map<size_t, float>>& optimized_distance, size_t starting_node) {
+
+	map<size_t, float> tempMap;
+
 	float min[2] = { -1,INFTY };	//min[0] = key of min, min[1] = value of min
 	for (size_t i = 0; i < count; ++i) {
-		if (!used[i] && optimized_distance[i].find(i)->second < min[1]) {
-			min[1] = optimized_distance[i].find(i)->second;
+		tempMap = optimized_distance[starting_node];
+		//cout << endl << tempMap.find(i)->second << endl << min[1] << endl << endl;
+		if (!used[i] && tempMap.find(i)->second <= min[1]) { //THIS KEEPS THROWING AN EXCEPTION!!!!!!!!!!!!!!
+			min[1] = tempMap.find(i)->second;
 			min[0] = i;
 		}	//if there are multiple instances of the min distance, it doesn't matter which is used next
 	}
@@ -166,10 +185,10 @@ bool is_float( const string &input) {
 void Dijkstra(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names) {
 	
 	optimize(distance, optimized_distance, count, node_names);
-	cout << "Final results: \n";
+	cout << "Shortest Possible Distances: \n";
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = 0; j < count; ++j) {
-			cout << " From \"" << node_names[i] << "\' to \"" << node_names[j] << "'\": " << optimized_distance[i].find(j)->second << '\n';
+			cout << " From \"" << node_names[i] << "\" to \"" << node_names[j] << "\": " << optimized_distance[i].find(j)->second << '\n';
 		}
 	}
 }
