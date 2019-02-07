@@ -99,7 +99,7 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = 0; j < count; ++j) {
-			if (i != j) {	//distance between a node and itself is already initialized to 0
+			if (i != j) {	//distance between a node and itself is 0
 				do {
 					cout << "Enter the direct distance between node \"" << node_names[i] << "\" and node \"" << node_names[j] << "\": ";
 					cin >> current_distance; //enty "inf" or "infinity" for no connection
@@ -122,8 +122,12 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 					//else distance = infinity which is the already-initialized value, so do nothing for that
 				} while (!valid);
 			}
-			distance[i] = tempMap;
+			else {
+				tempMap.insert(pair<size_t, float>(j, 0));
+			}
 		}
+		distance[i] = tempMap;
+		tempMap.clear();
 	}
 }
 
@@ -151,6 +155,7 @@ void optimize(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& 
 		}
 		optimized_distance[i].clear();
 		optimized_distance[i] = tempMap;
+		tempMap.clear();
 		fill(used.begin(), used.end(), false);	//reset, get ready to do again for next starting node
 	}
 }
