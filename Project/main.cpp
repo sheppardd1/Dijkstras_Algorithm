@@ -146,8 +146,9 @@ void optimize(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& 
 			key = get_min_unused_index(count, used, optimized_distance, i);
 			used[key] = true;
 			for (size_t j = 0; j < count; ++j) {
-				float sum = tempMap.find(key)->second + tempMap.find(j)->second;
+				float sum = tempMap.find(key)->second + optimized_distance[key].find(j)->second;
 				if (!used[j] && (sum < tempMap.find(j)->second)) {
+					tempMap.erase(j);
 					tempMap.insert(pair <size_t, float>(j, sum));
 				}
 			}
