@@ -52,11 +52,11 @@ int main()
 		size_t count = get_names(node_names);		// get node names and return number of nodes
 
 		vector <node> graph(count);					// create graph (a vector of nodes)
-			// example of syntax: node[2].direct_distance[3] is the distance from the 3rd node to the 4th node
+			// example of syntax: node_name[2].direct_distance[3] is the distance from the 3rd node to the 4th node
 
 		set_names(graph, node_names, count);		// put user-inputted names into the nodes
 
-		get_distances(graph, count);	// get distances between each node from user
+		get_distances(graph, count);				// get distances between each node from user
 
 		print_dijkstra(graph, count);				// print optimized results
 
