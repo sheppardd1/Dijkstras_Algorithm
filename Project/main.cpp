@@ -1,17 +1,17 @@
-#include "stdafx.h"
-#include <iostream>    // Provides cout
-#include <cstdlib>     // Provides EXIT_SUCCESS
-#include <string>
-#include <map>
-#include <limits>
-#include <vector>
-#include <sstream>
-#include <iostream>
-#include <assert.h>
+#include "stdafx.h"		// for Visual Studio
+#include <iostream>		// Provides cout
+#include <cstdlib>		// Provides EXIT_SUCCESS
+#include <string>		// provides strings
+#include <map>			// provides maps
+#include <limits>		// provides infinity value
+#include <vector>		// provides vectors
+#include <sstream>		// used for testing in is_float()
+#include <iostream>		// in/out streams
+#include <assert.h>		// provides assertions
 using namespace std;   // Allows all standard library items to be used
 
 // Constants:
-const float INFTY = numeric_limits<float>::infinity();
+const float INFTY = numeric_limits<float>::infinity();		//system's value of infinity
 
 // Prototypes:
 void get_names(vector<string>&, size_t&);
@@ -23,14 +23,11 @@ void Dijkstra(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const si
 
 int main()
 {
-
 	vector <string> node_names;
 	size_t count = 0;
 	// If distance from node A to C is 3, then distance[0] will contain a map with the points (2,3) because node C is represented by 2, the distance is 3, and the start is A which is representd by 0.
 
 	get_names(node_names, count);
-
-	cout << "Total number of nodes: " << count << endl;
 
 	vector<map<size_t, float> > distance(count);			//user-inputted direct distances between nodes
 	vector<map<size_t, float> > optimized_distance(count);
@@ -48,7 +45,7 @@ int main()
 void get_names(vector<string>& node_names, size_t& count) {
 	string name;
 	bool valid = true;
-	cout << "Enter \"done\" to finish entering node names.\n";
+	cout << "Enter the names of the nodes.\nType \"done\" to finish entering node names.\n";
 	do {
 		if (valid) {	//don't print if user only entered '\n' so far
 			cout << "Node " << count + 1 << ": ";
@@ -69,6 +66,8 @@ void get_names(vector<string>& node_names, size_t& count) {
 	for (size_t i = 0; i < count; ++i) {
 		cout << ' ' << node_names[i] << endl;
 	}
+
+	cout << "Total number of nodes: " << count << endl;
 }
 
 
@@ -80,13 +79,13 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 	bool valid = true;
 	map<size_t, float> tempMap;
 
-
+	cout << "\nEnter the direct distances between the nodes\n(type \"i\" or \"infinity\" for no connection)\n\n";
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = 0; j < count; ++j) {
 			if (i != j) {	//distance between a node and itself is 0
 				do {
-					cout << "Enter the direct distance between node \"" << node_names[i] << "\" and node \"" << node_names[j] << "\": ";
-					cin >> current_distance; //enty "inf" or "infinity" for no connection
+					cout << " \"" << node_names[i] << "\" and \"" << node_names[j] << "\": ";
+					cin >> current_distance; //enty "i" or "infinity" for no connection
 					//check for validity
 					if (is_float(current_distance)) {
 						current_distance_float = stof(current_distance);
@@ -99,17 +98,26 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 							cout << "ERROR - Value cannot be negative. Try again.\n";
 						}
 					}
-					else if (current_distance != "infinity" && current_distance != "inf") {
+					else if (current_distance != "infinity" && current_distance != "i" && current_distance != "undo") {
 						valid = false;
-						cout << "ERROR - Not a valid value. Enter a numerical value or \'inf\' or \'infinity\' for no connection. Try again.\n";
+						cout << "ERROR - Not a valid value. Enter a numerical value or \'i\' or \'infinity\' for no connection. Try again.\n";
 					}
-					else {
+					else if(current_distance != "undo") {
 						tempMap.insert(pair<size_t, float>(j, INFTY));
 						valid = true;
 					}
 					//else distance = infinity which is the already-initialized value, so do nothing for that
 				} while (!valid);
-			}
+
+				/*if (current_distance == "undo" && j != 0) {
+					--j;
+				}
+				else if (current_distance == "undo")
+				{
+					j = count-1;
+					--i;
+				}*/
+			}//end if i != j
 			else {
 				tempMap.insert(pair<size_t, float>(j, 0));
 			}
@@ -120,32 +128,26 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 }
 
 void optimize(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names) {
-	//map<size_t, float>::iterator itr;
 	optimized_distance = distance;
 	vector <bool> used(count,false);
 	size_t num_unused, key;
-	map<size_t, float> tempMap;
 
-	for (size_t i = 0; i < count; ++i) {	//loop for node variable as starting node(?)
-		tempMap = optimized_distance[i];
+	for (size_t i = 0; i < count; ++i) {			//loop for node variable as starting node(?)
 		used[i] = true;
 		num_unused = count-1;
-		while (num_unused > 0) {	// test
+		while (num_unused > 0) {
 			key = get_min_unused_index(count, used, optimized_distance, i);
 			used[key] = true;
 			for (size_t j = 0; j < count; ++j) {
-				float sum = tempMap.find(key)->second + optimized_distance[key].find(j)->second;
-				if (!used[j] && (sum < tempMap.find(j)->second)) {
-					tempMap.erase(j);
-					tempMap.insert(pair <size_t, float>(j, sum));
+				float sum = optimized_distance[i].find(key)->second + optimized_distance[key].find(j)->second;
+				if (!used[j] && (sum < optimized_distance[i].find(j)->second)) {
+					optimized_distance[i].erase(j);
+					optimized_distance[i].insert(pair <size_t, float>(j, sum));
 				}
 			}
 			--num_unused;
 		}
-		optimized_distance[i].clear();
-		optimized_distance[i] = tempMap;
-		tempMap.clear();
-		fill(used.begin(), used.end(), false);	//reset, get ready to do again for next starting node
+		fill(used.begin(), used.end(), false);		// reset used array to all false, get ready to do run for next starting node
 	}
 }
 
@@ -168,7 +170,8 @@ size_t get_min_unused_index(size_t count, vector<bool> used, vector<map<size_t, 
 
 
 bool is_float(const string &input) {
-// This function was taken from: https://www.quora.com/How-can-I-check-if-a-std-string-is-a-floating-point-number-in-C++
+// This function was taken from: 
+// https://www.quora.com/How-can-I-check-if-a-std-string-is-a-floating-point-number-in-C++
 // Written by Richard Liu
 
 	stringstream sstr(input);
@@ -179,10 +182,15 @@ bool is_float(const string &input) {
 void Dijkstra(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names) {
 	
 	optimize(distance, optimized_distance, count, node_names);
-	cout << "Shortest Possible Distances: \n";
+	cout << "\n\n----------------------------\nShortest Possible Distances:\n----------------------------\n";
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = 0; j < count; ++j) {
-			cout << " From \"" << node_names[i] << "\" to \"" << node_names[j] << "\": " << optimized_distance[i].find(j)->second << '\n';
+			if (optimized_distance[i].find(j)->second < INFTY) {
+				cout << " From \"" << node_names[i] << "\" to \"" << node_names[j] << "\": " << optimized_distance[i].find(j)->second << '\n';
+			}
+			else {
+				cout << " From \"" << node_names[i] << "\" to \"" << node_names[j] << "\": Infinity\n";
+			}
 		}
 	}
 }
