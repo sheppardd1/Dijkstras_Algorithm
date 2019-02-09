@@ -103,7 +103,7 @@ void get_distances(vector<node>& input_node, const size_t count, vector <string>
 		for (size_t j = 0; j < count; ++j) {
 			if (i != j) {	//distance between a node and itself is 0
 				do {
-					cout << " \"" << node_names[i] << "\" and \"" << node_names[j] << "\": ";
+					cout << " \"" << node_names[i] << "\" to \"" << node_names[j] << "\": ";
 					cin >> current_distance; //enty "i" or "infinity" for no connection
 					//check for validity
 					if (is_float(current_distance)) {
@@ -147,11 +147,11 @@ void Dijkstra(vector<node>& input_node, const size_t count) {
 		for (size_t j = 0; j < count; ++j) {
 			if (input_node[i].dijkstra_distance[j] < INFTY) {
 				cout << " From \"" << input_node[i].name << "\" to \"" << input_node[j].name << "\": " << input_node[i].dijkstra_distance[j] << '\n';
-				cout << "  Path: " << input_node[i].dijkstra_path[j] << endl;
+				cout << "     Path: " << input_node[i].dijkstra_path[j] << endl;
 			}
 			else {
 				cout << " From \"" << input_node[i].name << "\" to \"" << input_node[j].name << "\": Infinity\n";
-				cout << "  Path: NA\n";
+				cout << "     Path: NA\n";
 			}
 		}
 	}
@@ -177,7 +177,7 @@ void optimize(vector<node>& input_node, const size_t count) {
 				sum = input_node[i].dijkstra_distance[index] + input_node[index].dijkstra_distance[j];
 				if (!used[j] && (sum < input_node[i].dijkstra_distance[j])) {		// is this new path shorter?
 					input_node[i].dijkstra_distance[j] = sum;						// set new shorter distance
-					new_path = input_node[i].dijkstra_path[index] + input_node[index].dijkstra_path[j] + " --> ";
+					new_path = input_node[i].dijkstra_path[index] + " - " + input_node[index].dijkstra_path[j];
 					input_node[i].dijkstra_path[j] = new_path;
 				}
 			}
@@ -206,7 +206,6 @@ void init_paths(vector<node>& input_node, size_t count) {
 	string start;
 	for (size_t i = 0; i < count; ++i) {
 		start = input_node[i].name;
-		//start.append(" --> ");
 		for (size_t j = 0; j < count; ++j) {
 			input_node[i].dijkstra_path.push_back(start);
 		}
@@ -217,7 +216,7 @@ void finish_paths(vector<node>& input_node, size_t count) {
 	string end;
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = 0; j < count; ++j) {
-			input_node[i].dijkstra_path[j].append(input_node[j].name);
+			input_node[i].dijkstra_path[j].append(" - " + input_node[j].name);
 		}
 	}
 }
