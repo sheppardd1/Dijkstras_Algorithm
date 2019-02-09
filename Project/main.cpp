@@ -16,7 +16,6 @@ const float INFTY = numeric_limits<float>::infinity();
 // Prototypes:
 void get_names(vector<string>&, size_t&);
 bool is_float(const string &input);
-void init_distances(vector<map<size_t, float>>&, const size_t );
 void get_distances(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
 size_t get_min_unused_index(size_t, vector<bool>, vector<map<size_t, float>>&, size_t);
 void optimize(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
@@ -48,13 +47,20 @@ int main()
 
 void get_names(vector<string>& node_names, size_t& count) {
 	string name;
+	bool valid = true;
 	cout << "Enter \"done\" to finish entering node names.\n";
 	do {
-		cout << "Node " << count + 1 << ": ";
+		if (valid) {	//don't print if user only entered '\n' so far
+			cout << "Node " << count + 1 << ": ";
+		}
 		getline(cin, name);
-		if (name != "done") {
+		if (name != "done" && name != "") {
 			node_names.push_back(name);
 			++count;
+			valid = true;
+		}
+		else if (name == "") {
+			valid = false;
 		}
 	} while (name != "done");
 
@@ -65,24 +71,6 @@ void get_names(vector<string>& node_names, size_t& count) {
 	}
 }
 
-void init_distances(vector<map<size_t, float>>& distance, const size_t count) {
-	// essentially creating a square matrix (like multiplication table)
-
-	map<size_t, float> tempMap;
-
-	for (size_t i = 0; i < count; ++i) {
-		for (size_t j = 0; j < count; ++j) {
-			if (i == j) {
-				tempMap.insert(pair<size_t, float>(j, 0));	// init distance from node to itself to 0
-			}
-			else {
-				tempMap.insert(pair<size_t, float>(j,INFTY));	// init all distance combinations to infty, except when the node matches with itself (i.e. distance from node to itself = 0)
-			}
-		}
-		distance[i] = tempMap;
-		tempMap.clear();
-	}
-}
 
 //initialize distance vector maps
 void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names) {
@@ -90,10 +78,6 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 	string current_distance;
 	float current_distance_float;
 	bool valid = true;
-
-	init_distances(distance, count);
-	//init_distances(optimized_distance, count);
-
 	map<size_t, float> tempMap;
 
 
@@ -118,6 +102,10 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 					else if (current_distance != "infinity" && current_distance != "inf") {
 						valid = false;
 						cout << "ERROR - Not a valid value. Enter a numerical value or \'inf\' or \'infinity\' for no connection. Try again.\n";
+					}
+					else {
+						tempMap.insert(pair<size_t, float>(j, INFTY));
+						valid = true;
 					}
 					//else distance = infinity which is the already-initialized value, so do nothing for that
 				} while (!valid);
@@ -179,7 +167,7 @@ size_t get_min_unused_index(size_t count, vector<bool> used, vector<map<size_t, 
 }
 
 
-bool is_float( const string &input) {
+bool is_float(const string &input) {
 // This function was taken from: https://www.quora.com/How-can-I-check-if-a-std-string-is-a-floating-point-number-in-C++
 // Written by Richard Liu
 
