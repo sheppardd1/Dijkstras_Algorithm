@@ -2,7 +2,6 @@
 #include <iostream>		// Provides cout
 #include <cstdlib>		// Provides EXIT_SUCCESS
 #include <string>		// provides strings
-#include <map>			// provides maps
 #include <limits>		// provides infinity value
 #include <vector>		// provides vectors
 #include <sstream>		// used for testing in is_float()
@@ -13,28 +12,40 @@ using namespace std;   // Allows all standard library items to be used
 // Constants:
 const float INFTY = numeric_limits<float>::infinity();		//system's value of infinity
 
+// Node struct
+struct node
+{
+	vector <float> direct_distance;
+	vector <float> dijkstra_distance;
+	vector <string> dijkstra_path;
+	string name;
+};
+
 // Prototypes:
-void get_names(vector<string>&, size_t&);
+size_t get_names(vector<string>&);
 bool is_float(const string &input);
-void get_distances(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
-size_t get_min_unused_index(size_t, vector<bool>, vector<map<size_t, float>>&, size_t);
-void optimize(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
-void Dijkstra(vector<map<size_t, float>>&, vector<map<size_t, float>>&, const size_t, vector <string>&);
+void get_distances(vector<node>&, const size_t, vector <string>&);
+size_t get_min_unused_index(size_t, vector<bool>, vector<node>&, size_t);
+void set_names(vector<node>&, vector<string>&, size_t);
+void optimize(vector<node>&, const size_t);
+void Dijkstra(vector<node>&, const size_t);
+
+
 
 int main()
 {
 	vector <string> node_names;
-	size_t count = 0;
-	// If distance from node A to C is 3, then distance[0] will contain a map with the points (2,3) because node C is represented by 2, the distance is 3, and the start is A which is representd by 0.
 
-	get_names(node_names, count);
+	size_t count = get_names(node_names);
 
-	vector<map<size_t, float> > distance(count);			//user-inputted direct distances between nodes
-	vector<map<size_t, float> > optimized_distance(count);
+	vector <node> graph(count);
 
-	get_distances(distance, optimized_distance, count, node_names);
+	set_names(graph, node_names, count);
 
-	Dijkstra(distance, optimized_distance, count, node_names);
+	get_distances(graph, count, node_names);
+
+	Dijkstra(graph, count);
+
 
 	// wait for user to press ENTER before exiting
 	cin.get();
@@ -42,7 +53,8 @@ int main()
 	return EXIT_SUCCESS;
 }
 
-void get_names(vector<string>& node_names, size_t& count) {
+size_t get_names(vector<string>& node_names) {
+	size_t count = 0;
 	string name;
 	bool valid = true;
 	cout << "Enter the names of the nodes.\nType \"done\" to finish entering node names.\n";
@@ -68,16 +80,21 @@ void get_names(vector<string>& node_names, size_t& count) {
 	}
 
 	cout << "Total number of nodes: " << count << endl;
+
+	return count;
 }
 
+void set_names(vector<node>& input_node, vector<string>& node_names, size_t number) {
+	for (size_t i = 0; i < number; ++i) {
+		input_node[i].name = node_names[i];
+	}
+}
 
-//initialize distance vector maps
-void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names) {
+void get_distances(vector<node>& input_node, const size_t count, vector <string>& node_names) {
 	
 	string current_distance;
 	float current_distance_float;
 	bool valid = true;
-	map<size_t, float> tempMap;
 
 	cout << "\nEnter the direct distances between the nodes\n(type \"i\" or \"infinity\" for no connection)\n\n";
 	for (size_t i = 0; i < count; ++i) {
@@ -90,7 +107,8 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 					if (is_float(current_distance)) {
 						current_distance_float = stof(current_distance);
 						if (current_distance_float >= 0) {
-							tempMap.insert(pair<size_t, float>(j, current_distance_float));
+							input_node[i].direct_distance.push_back(current_distance_float);
+							input_node[i].dijkstra_distance.push_back(current_distance_float);
 							valid = true;
 						}
 						else {
@@ -103,46 +121,38 @@ void get_distances(vector<map<size_t, float>>& distance, vector<map<size_t, floa
 						cout << "ERROR - Not a valid value. Enter a numerical value or \'i\' or \'infinity\' for no connection. Try again.\n";
 					}
 					else if(current_distance != "undo") {
-						tempMap.insert(pair<size_t, float>(j, INFTY));
+						input_node[i].direct_distance.push_back(INFTY);
+						input_node[i].dijkstra_distance.push_back(INFTY);
 						valid = true;
 					}
-					//else distance = infinity which is the already-initialized value, so do nothing for that
 				} while (!valid);
 
-				/*if (current_distance == "undo" && j != 0) {
-					--j;
-				}
-				else if (current_distance == "undo")
-				{
-					j = count-1;
-					--i;
-				}*/
 			}//end if i != j
 			else {
-				tempMap.insert(pair<size_t, float>(j, 0));
+				input_node[i].direct_distance.push_back(0);
+				input_node[i].dijkstra_distance.push_back(0);
 			}
 		}
-		distance[i] = tempMap;
-		tempMap.clear();
+
 	}
 }
 
-void optimize(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names) {
-	optimized_distance = distance;
+void optimize(vector<node>& input_node, const size_t count) {
+	
 	vector <bool> used(count,false);
 	size_t num_unused, key;
+	float sum;
 
 	for (size_t i = 0; i < count; ++i) {			//loop for node variable as starting node(?)
 		used[i] = true;
 		num_unused = count-1;
 		while (num_unused > 0) {
-			key = get_min_unused_index(count, used, optimized_distance, i);
+			key = get_min_unused_index(count, used, input_node, i);
 			used[key] = true;
 			for (size_t j = 0; j < count; ++j) {
-				float sum = optimized_distance[i].find(key)->second + optimized_distance[key].find(j)->second;
-				if (!used[j] && (sum < optimized_distance[i].find(j)->second)) {
-					optimized_distance[i].erase(j);
-					optimized_distance[i].insert(pair <size_t, float>(j, sum));
+				sum = input_node[i].dijkstra_distance[key] + input_node[key].dijkstra_distance[j];
+				if (!used[j] && (sum < input_node[i].dijkstra_distance[j])){
+					input_node[i].dijkstra_distance[j] = sum;
 				}
 			}
 			--num_unused;
@@ -151,16 +161,12 @@ void optimize(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& 
 	}
 }
 
-size_t get_min_unused_index(size_t count, vector<bool> used, vector<map<size_t, float>>& optimized_distance, size_t starting_node) {
+size_t get_min_unused_index(size_t count, vector<bool> used, vector<node>& input_node, size_t starting_node) {
 
-	map<size_t, float> tempMap;
-
-	float min[2] = { -1,INFTY };	//min[0] = key of min, min[1] = value of min
+	float min[2] = { -1,INFTY };	//min[0] = index of min, min[1] = value of min
 	for (size_t i = 0; i < count; ++i) {
-		tempMap = optimized_distance[starting_node];
-		//cout << endl << tempMap.find(i)->second << endl << min[1] << endl << endl;
-		if (!used[i] && tempMap.find(i)->second <= min[1]) { //THIS KEEPS THROWING AN EXCEPTION!!!!!!!!!!!!!!
-			min[1] = tempMap.find(i)->second;
+		if (!used[i] && input_node[starting_node].dijkstra_distance[i] <= min[1]) {
+			min[1] = input_node[starting_node].dijkstra_distance[i];
 			min[0] = i;
 		}	//if there are multiple instances of the min distance, it doesn't matter which is used next
 	}
@@ -179,17 +185,17 @@ bool is_float(const string &input) {
 	return !((sstr >> noskipws >> new_float).rdstate() ^ ios_base::eofbit);
 } 
 
-void Dijkstra(vector<map<size_t, float>>& distance, vector<map<size_t, float>>& optimized_distance, const size_t count, vector <string>& node_names) {
+void Dijkstra(vector<node>& input_node, const size_t count) {
 	
-	optimize(distance, optimized_distance, count, node_names);
+	optimize(input_node, count);
 	cout << "\n\n----------------------------\nShortest Possible Distances:\n----------------------------\n";
 	for (size_t i = 0; i < count; ++i) {
 		for (size_t j = 0; j < count; ++j) {
-			if (optimized_distance[i].find(j)->second < INFTY) {
-				cout << " From \"" << node_names[i] << "\" to \"" << node_names[j] << "\": " << optimized_distance[i].find(j)->second << '\n';
+			if (input_node[i].dijkstra_distance[j] < INFTY) {
+				cout << " From \"" << input_node[i].name << "\" to \"" << input_node[j].name << "\": " << input_node[i].dijkstra_distance[j] << '\n';
 			}
 			else {
-				cout << " From \"" << node_names[i] << "\" to \"" << node_names[j] << "\": Infinity\n";
+				cout << " From \"" << input_node[i].name << "\" to \"" << input_node[j].name << "\": Infinity\n";
 			}
 		}
 	}
