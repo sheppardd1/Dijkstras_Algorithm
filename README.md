@@ -5,7 +5,7 @@ The algorithm is designed for finding the shortest distance between 2 nodes in a
 ### Use
 On startup, the program prompts for names of each node. After entering each node name, type "done" to finish entering the names. Then, the program will prompt the user for the distance between each node. Distances are one-way only. To represent no connection between nodes, type "i" or "infinity" instead of a number. Once this is finished, the program outputs the shortest distance between each node for every possible combination of nodes. additionally, the path that must be followed to achieve the shortest distance for each case is printed. At the end, the user can choose to start over with a different graph (set of nodes) or exit the program.
 ### Implementation:
-* Nodes are defined as a struct with 4 elements:
+* Nodes are defined as a struct with 4 elements:<br />
 `struct node
 {
 	vector <float> direct_distance;	 	 // direct_distance[i] is direct distance from current node to node i
