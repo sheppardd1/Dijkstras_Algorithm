@@ -2,6 +2,10 @@
 ## Basic C++ implementation of Dijkstra's Algorithm
 ### Purpose
 The algorithm is designed for finding the shortest distance between two nodes in a graph. It is an implementation of Dijkstra's Algorithm.
+### Files
+* Visual Studio Implementation: Project/main.cpp
+* Linux (Ubuntu) Implementation: Linux folder
+* Windows Executable: Debug/Program.exe
 ### Running the program
 * Windows: An executable Windows file called "Program.exe" can be found in the Debug folder. Simply download and double-click the file to run.
 * Linux (Ubuntu): An executable file called "Program.out" can be found in the "Linux" folder. This file can be downloaded and run by typing ./Program.out in the terminal (once the terminal is open in the directory of the .out file).
@@ -17,5 +21,7 @@ On startup, the program prompts for names of each node. After entering each node
   * Example of syntax: node_name[2].direct_distance[3] is the distance from the 3rd node to the 4th node
 ### Notes
 * This project can be found on Github at: https://github.com/sheppardd1/Dijkstras_Algorithm
+## Dependencies
+* This project requires a minimum of C++ 11 when compiling (with g++ use command -std=c++11) for the stof() function.
 ### Last Update:
 9 Feb 2019 - finished successful implementation and comments
