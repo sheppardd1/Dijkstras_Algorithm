@@ -29,6 +29,8 @@ size_t get_min_unused_index(size_t, vector<bool>, vector<node>&, size_t);
 void set_names(vector<node>&, vector<string>&, size_t);
 void optimize(vector<node>&, const size_t);
 void Dijkstra(vector<node>&, const size_t);
+void init_paths(vector<node>&, size_t);
+void finish_paths(vector<node>&, size_t);
 
 
 
@@ -137,28 +139,54 @@ void get_distances(vector<node>& input_node, const size_t count, vector <string>
 	}
 }
 
-void optimize(vector<node>& input_node, const size_t count) {
+void Dijkstra(vector<node>& input_node, const size_t count) {
 	
-	vector <bool> used(count,false);
-	size_t num_unused, key;
-	float sum;
+	optimize(input_node, count);
+	cout << "\n\n----------------------------\nShortest Possible Distances:\n----------------------------\n";
+	for (size_t i = 0; i < count; ++i) {
+		for (size_t j = 0; j < count; ++j) {
+			if (input_node[i].dijkstra_distance[j] < INFTY) {
+				cout << " From \"" << input_node[i].name << "\" to \"" << input_node[j].name << "\": " << input_node[i].dijkstra_distance[j] << '\n';
+				cout << "  Path: " << input_node[i].dijkstra_path[j] << endl;
+			}
+			else {
+				cout << " From \"" << input_node[i].name << "\" to \"" << input_node[j].name << "\": Infinity\n";
+				cout << "  Path: NA\n";
+			}
+		}
+	}
+}
 
-	for (size_t i = 0; i < count; ++i) {			//loop for node variable as starting node(?)
+void optimize(vector<node>& input_node, const size_t count) {
+
+	vector <bool> used(count, false);
+	size_t num_unused, index;
+	float sum;
+	string new_path;
+
+	init_paths(input_node, count);
+
+	for (size_t i = 0; i < count; ++i) {			// i is the starting node
 		used[i] = true;
-		num_unused = count-1;
+		num_unused = count - 1;
 		while (num_unused > 0) {
-			key = get_min_unused_index(count, used, input_node, i);
-			used[key] = true;
-			for (size_t j = 0; j < count; ++j) {
-				sum = input_node[i].dijkstra_distance[key] + input_node[key].dijkstra_distance[j];
-				if (!used[j] && (sum < input_node[i].dijkstra_distance[j])){
-					input_node[i].dijkstra_distance[j] = sum;
+			index = get_min_unused_index(count, used, input_node, i);	// find out smallest distance that isn't used yet
+			used[index] = true;											// now used
+			for (size_t j = 0; j < count; ++j) {						// j is the destination node
+				// sum = distance from i node to index node + distance from index node to j node
+				sum = input_node[i].dijkstra_distance[index] + input_node[index].dijkstra_distance[j];
+				if (!used[j] && (sum < input_node[i].dijkstra_distance[j])) {		// is this new path shorter?
+					input_node[i].dijkstra_distance[j] = sum;						// set new shorter distance
+					new_path = input_node[i].dijkstra_path[index] + input_node[index].dijkstra_path[j] + " --> ";
+					input_node[i].dijkstra_path[j] = new_path;
 				}
 			}
 			--num_unused;
 		}
 		fill(used.begin(), used.end(), false);		// reset used array to all false, get ready to do run for next starting node
 	}
+
+	finish_paths(input_node, count);
 }
 
 size_t get_min_unused_index(size_t count, vector<bool> used, vector<node>& input_node, size_t starting_node) {
@@ -174,29 +202,32 @@ size_t get_min_unused_index(size_t count, vector<bool> used, vector<node>& input
 	return min[0];
 }
 
+void init_paths(vector<node>& input_node, size_t count) {
+	string start;
+	for (size_t i = 0; i < count; ++i) {
+		start = input_node[i].name;
+		//start.append(" --> ");
+		for (size_t j = 0; j < count; ++j) {
+			input_node[i].dijkstra_path.push_back(start);
+		}
+	}
+}
+
+void finish_paths(vector<node>& input_node, size_t count) {
+	string end;
+	for (size_t i = 0; i < count; ++i) {
+		for (size_t j = 0; j < count; ++j) {
+			input_node[i].dijkstra_path[j].append(input_node[j].name);
+		}
+	}
+}
 
 bool is_float(const string &input) {
-// This function was taken from: 
-// https://www.quora.com/How-can-I-check-if-a-std-string-is-a-floating-point-number-in-C++
-// Written by Richard Liu
+	// This function was taken from: 
+	// https://www.quora.com/How-can-I-check-if-a-std-string-is-a-floating-point-number-in-C++
+	// Written by Richard Liu
 
 	stringstream sstr(input);
 	float new_float;
 	return !((sstr >> noskipws >> new_float).rdstate() ^ ios_base::eofbit);
-} 
-
-void Dijkstra(vector<node>& input_node, const size_t count) {
-	
-	optimize(input_node, count);
-	cout << "\n\n----------------------------\nShortest Possible Distances:\n----------------------------\n";
-	for (size_t i = 0; i < count; ++i) {
-		for (size_t j = 0; j < count; ++j) {
-			if (input_node[i].dijkstra_distance[j] < INFTY) {
-				cout << " From \"" << input_node[i].name << "\" to \"" << input_node[j].name << "\": " << input_node[i].dijkstra_distance[j] << '\n';
-			}
-			else {
-				cout << " From \"" << input_node[i].name << "\" to \"" << input_node[j].name << "\": Infinity\n";
-			}
-		}
-	}
 }
