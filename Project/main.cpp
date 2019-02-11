@@ -2,7 +2,7 @@
 	Dijkstra's Algorithm
 	Implemented by David Sheppard
 	Created: 2/5/2019
-	Last Updated: 2/9/2019 (changed inplementation of nodes)
+	Last Updated: 2/10/2019 (added support for undirected graphs)
 	Purpose: Finds the shortest distance between to nodes on a graph
 		and prints out the optimized distances and paths
 */
