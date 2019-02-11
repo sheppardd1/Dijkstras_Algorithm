@@ -5,7 +5,6 @@
 	Last Updated: 2/9/2019 (changed inplementation of nodes)
 	Purpose: Finds the shortest distance between to nodes on a graph
 		and prints out the optimized distances and paths
-
 */
 
 #include "stdafx.h"		// for Visual Studio
@@ -34,7 +33,9 @@ struct node
 // Prototypes:
 size_t get_names(vector<string>&);											// user inputs names of each node and returns number of nodes entered
 bool is_float(const string &input);											// determines if a number can be converted to a float (credit: Richard Liu) 
-void get_distances(vector<node>&, const size_t);			// lets user input distance between each node (both directions)
+void get_distances(vector<node>&, const size_t);							// lets user choose if graph is one or two way and calls appropriate distance function
+void get_directed_distances(vector<node>&, const size_t);					// lets user input one-way distance between each node (both directions)
+void get_undirected_distances(vector<node>&, const size_t);					// lets user input two-way distance between each node
 size_t get_min_unused_index(size_t, vector<bool>, vector<node>&, size_t);	// determines which node to focus on for next iteration of Dijkstra's algorithm
 void set_names(vector<node>&, vector<string>&, size_t);						// assigns the user-inputted name to each node
 void optimize(vector<node>&, const size_t);									// performs Dijstra's algorithm
@@ -114,7 +115,34 @@ void set_names(vector<node>& input_node, vector<string>& node_names, size_t numb
 }
 
 void get_distances(vector<node>& input_node, const size_t count) {
-	// purpose: gest direct (one-way) distances between nodes from user
+	// purpose: asks user if they want a digraph or undirected graph and calls appropriate function
+	// utilizes: vector of nodes as input graph and size_t value as graph size (number of nodes)
+	char option;											// answer entered by user
+	bool valid = true;										// true iif user enteres valid option: U, u, D, d
+	do {													// ask while user has not entered a valid option
+		// give directions:
+		if (valid) {										// only give regular directions on first time
+			cout << "Do you want to create a digraph (one-way) or an undirected graph (two-way)?";
+			cout << "\nEnter \'D\' for Digraph or \'U\' for Undirected graph: ";
+		}
+		cin >> option;										// get user's input
+		if (option == 'D' || option == 'd') {				// check if digraph
+			get_directed_distances(input_node, count);		// if digraph, need directed distances
+			valid = true;									// valid answer
+		}
+		else if (option == 'U' || option == 'u') {			// check if undirected graph
+			get_undirected_distances(input_node, count);	// if undirected, only need one set of directions per combination
+			valid = true;									// valid answer
+		}
+		else {												// if invalid answer, say so
+			cout << "Invalid option. Enter either \'U\' or \'D\': ";	// print error with directions
+			valid = false;									// need to repeat question
+		}
+	} while (!valid);										// run until valid answer is given
+}
+
+void get_directed_distances(vector<node>& input_node, const size_t count) {
+	// purpose: gest direct (one-way) distances between nodes from user for digraph
 	// utilizes: vector of nodes as destination for distances and source of names, size_t as number of nodes
 
 	string current_distance;						// distance between 2 nodes as a string
@@ -156,6 +184,61 @@ void get_distances(vector<node>& input_node, const size_t count) {
 				} while (!valid);	//keep asking for distance until valid one is entered
 
 			}			//end if i != j
+			else {		// if i == j
+				input_node[i].direct_distance.push_back(0);		//distance between a node and itself is 0
+				input_node[i].dijkstra_distance.push_back(0);	//distance between a node and itself is 0
+			}
+		}		// end lloping thru destination node
+	}		// end looping thru source node
+}
+
+void get_undirected_distances(vector<node>& input_node, const size_t count) {
+	// purpose: gest direct two-way distances between nodes from user for undirected graph
+	// utilizes: vector of nodes as destination for distances and source of names, size_t as number of nodes
+
+	string current_distance;						// distance between 2 nodes as a string
+	float current_distance_float;					// distance between 2 nodes as a float
+	bool valid = true;								// true when users enters valid distance
+
+													// print directions
+	cout << "\nEnter the direct distances between the nodes\n(type \"i\" or \"infinity\" for no connection)\n\n";
+
+	// get distances
+	for (size_t i = 0; i < count; ++i) {			// iterate for each node as starting node	
+		for (size_t j = 0; j < count; ++j) {		// iterate for each node as ending node
+			if (i < j) {							//distance between a node and itself is 0
+				do {
+					cout << " \"" << input_node[i].name << "\" and \"" << input_node[j].name << "\": ";	// print start and end node that we are asking distance for
+					cin >> current_distance;													// get distance from user (enter "i" or "infinity" for no connection)
+					if (is_float(current_distance)) {											// check for validity: if it can be converted to float, it is valid
+						current_distance_float = stof(current_distance);						// do actual conversion of string to float
+						if (current_distance_float >= 0) {										// ensure distance is positive
+							input_node[i].direct_distance.push_back(current_distance_float);	// put validated distance into node
+							input_node[i].dijkstra_distance.push_back(current_distance_float);	// also put validated distance into optimized distance vector for now
+							valid = true;														// input was valid
+						}
+						else {																	// if input was negative
+							valid = false;														// invalid if negative
+							cout << "ERROR - Value cannot be negative. Try again.\n";			// print erro message
+						}
+					}
+					else if (current_distance != "infinity" && current_distance != "i") {		// if non-float distance is not "i" or "infinity" it is bad
+						valid = false;															// invalid
+																								// print error:
+						cout << "ERROR - Not a valid value. Enter a numerical value or \'i\' or \'infinity\' for no connection. Try again.\n";
+					}
+					else {																		// else, entered distance is infinity
+						input_node[i].direct_distance.push_back(INFTY);							// set validated distance equal to system's representation of infinity
+						input_node[i].dijkstra_distance.push_back(INFTY);						// also put validated distance equal to system's representation of infinity in optimized list
+						valid = true;															// value was valid
+					}
+				} while (!valid);	//keep asking for distance until valid one is entered
+
+			}			//end if i != j
+			else if (i > j) {	//distance from i to j can be set to already-defined distance from j to i
+				input_node[i].direct_distance.push_back(input_node[j].direct_distance[i]);		// put validated distance into node
+				input_node[i].dijkstra_distance.push_back(input_node[j].dijkstra_distance[i]);	// also put validated distance into optimized distance vector for now
+			}
 			else {		// if i == j
 				input_node[i].direct_distance.push_back(0);		//distance between a node and itself is 0
 				input_node[i].dijkstra_distance.push_back(0);	//distance between a node and itself is 0
