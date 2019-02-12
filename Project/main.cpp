@@ -2,7 +2,7 @@
 	Dijkstra's Algorithm
 	Implemented by David Sheppard
 	Created: 2/5/2019
-	Last Updated: 2/10/2019 (added support for undirected graphs)
+	Last Updated: 2/12/2019 (improved UI)
 	Purpose: Finds the shortest distance between to nodes on a graph
 		and prints out the optimized distances and paths
 */
@@ -16,7 +16,7 @@
 #include <sstream>		// used for testing in is_float()
 #include <iostream>		// in/out streams
 #include <assert.h>		// provides assertions
-using namespace std;   // Allows all standard library items to be used
+using namespace std;	// Allows all standard library items to be used
 
 // Constants:
 const float INFTY = numeric_limits<float>::infinity();		//system's value of infinity
@@ -96,11 +96,17 @@ size_t get_names(vector<string>& node_names) {
 	// print entered names:
 	cout << "Node Names: \n";
 	for (size_t i = 0; i < count; ++i) {
-		cout << ' ' << node_names[i] << endl;
+		cout << ' ' << node_names[i];
+		if (i != count - 1) {						// if not printing last node name, put comma
+			cout << ", ";
+		}
+		else {										// else if printing last node, put endl
+			cout << endl;
+		}
 	}
 	
 	// print number of nodes entered:
-	cout << "Total number of nodes: " << count << endl;
+	cout << "Total number of nodes: " << count << endl << endl;
 
 	return count;									// return number of nodes
 }
@@ -269,6 +275,7 @@ void print_dijkstra(vector<node>& input_node, const size_t count) {
 				cout << "     Path: NA\n";
 			}
 		}
+		cout << endl;
 	}
 }
 
