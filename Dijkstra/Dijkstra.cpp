@@ -1,10 +1,10 @@
 /*
-	Dijkstra's Algorithm
-	Implemented by David Sheppard
-	Created: 2/5/2019
-	Last Updated: 2/12/2019 (improved UI)
-	Purpose: Finds the shortest distance between to nodes on a graph
-		and prints out the optimized distances and paths
+Dijkstra's Algorithm
+Implemented by David Sheppard
+Created: 2/5/2019
+Last Updated: 2/12/2019 (improved UI)
+Purpose: Finds the shortest distance between to nodes on a graph
+and prints out the optimized distances and paths
 */
 
 #include "stdafx.h"		// for Visual Studio
@@ -18,10 +18,10 @@
 #include <assert.h>		// provides assertions
 using namespace std;	// Allows all standard library items to be used
 
-// Constants:
+						// Constants:
 const float INFTY = numeric_limits<float>::infinity();		//system's value of infinity
 
-// Node struct - represents a node on a graph
+															// Node struct - represents a node on a graph
 struct node
 {
 	vector <float> direct_distance;		// direct_distance[i] is direct distance from current node to node i
@@ -53,7 +53,7 @@ int main()
 		size_t count = get_names(node_names);		// get node names and return number of nodes
 
 		vector <node> graph(count);					// create graph (a vector of nodes)
-			// example of syntax: node_name[2].direct_distance[3] is the distance from the 3rd node to the 4th node
+													// example of syntax: node_name[2].direct_distance[3] is the distance from the 3rd node to the 4th node
 
 		set_names(graph, node_names, count);		// put user-inputted names into the nodes
 
@@ -74,9 +74,9 @@ size_t get_names(vector<string>& node_names) {
 	string name;								// name of current node
 	bool valid = true;							// used to ensure that user enters something other than endline
 
-	// print directions:
+												// print directions:
 	cout << "Enter the names of the nodes.\nType \"done\" to finish entering node names.\n";
-	
+
 	// Get names
 	do {
 		if (valid) {	//don't print if user only entered '\n' so far
@@ -93,7 +93,7 @@ size_t get_names(vector<string>& node_names) {
 		}
 	} while (name != "done");						// keep getting names until user enters "done"
 
-	// print entered names:
+													// print entered names:
 	cout << "Node Names: \n";
 	for (size_t i = 0; i < count; ++i) {
 		cout << ' ' << node_names[i];
@@ -104,7 +104,7 @@ size_t get_names(vector<string>& node_names) {
 			cout << endl;
 		}
 	}
-	
+
 	// print number of nodes entered:
 	cout << "Total number of nodes: " << count << endl << endl;
 
@@ -126,7 +126,7 @@ void get_distances(vector<node>& input_node, const size_t count) {
 	char option;											// answer entered by user
 	bool valid = true;										// true iif user enteres valid option: U, u, D, d
 	do {													// ask while user has not entered a valid option
-		// give directions:
+															// give directions:
 		if (valid) {										// only give regular directions on first time
 			cout << "Do you want to create a digraph (one-way) or an undirected graph (two-way)?";
 			cout << "\nEnter \'D\' for Digraph or \'U\' for Undirected graph: ";
@@ -155,7 +155,7 @@ void get_directed_distances(vector<node>& input_node, const size_t count) {
 	float current_distance_float;					// distance between 2 nodes as a float
 	bool valid = true;								// true when users enters valid distance
 
-	// print directions
+													// print directions
 	cout << "\nEnter the direct distances between the nodes\n(type \"i\" or \"infinity\" for no connection)\n\n";
 
 	// get distances
@@ -179,7 +179,7 @@ void get_directed_distances(vector<node>& input_node, const size_t count) {
 					}
 					else if (current_distance != "infinity" && current_distance != "i") {		// if non-float distance is not "i" or "infinity" it is bad
 						valid = false;															// invalid
-						// print error:
+																								// print error:
 						cout << "ERROR - Not a valid value. Enter a numerical value or \'i\' or \'infinity\' for no connection. Try again.\n";
 					}
 					else {																		// else, entered distance is infinity
@@ -256,14 +256,14 @@ void get_undirected_distances(vector<node>& input_node, const size_t count) {
 void print_dijkstra(vector<node>& input_node, const size_t count) {
 	// purpose: calls optimizing function and then prints result of optimized distances and paths
 	// utilizes: vector of nodes as source of names and input to optimization function, size_t for number of nodes
-	
+
 	optimize(input_node, count);								// run thru dijkstra's alogrithm
-	// print header for results
+																// print header for results
 	cout << "\n\n----------------------------\nShortest Possible Distances:\n----------------------------\n";
 	for (size_t i = 0; i < count; ++i) {						// loop through each source
 		for (size_t j = 0; j < count; ++j) {					// loop thru each destination
 			if (input_node[i].dijkstra_distance[j] < INFTY) {	// print non-infinite distance
-				// print value of shortest distance value:
+																// print value of shortest distance value:
 				cout << " From \"" << input_node[i].name << "\" to \"" << input_node[j].name << "\": " << input_node[i].dijkstra_distance[j] << '\n';
 				// print path corresponsing to shortest distance:
 				cout << "     Path: " << input_node[i].dijkstra_path[j] << endl;
@@ -296,11 +296,11 @@ void optimize(vector<node>& input_node, const size_t count) {
 			index = get_min_unused_index(count, used, input_node, i);	// find out smallest distance that isn't used yet
 			used[index] = true;											// this node is now used
 			for (size_t j = 0; j < count; ++j) {						// j is the destination node
-				// sum = distance from source node to index node + distance from index node to destination node
+																		// sum = distance from source node to index node + distance from index node to destination node
 				sum = input_node[i].dijkstra_distance[index] + input_node[index].dijkstra_distance[j];
 				if (!used[j] && (sum < input_node[i].dijkstra_distance[j])) {		// is this new path shorter?
 					input_node[i].dijkstra_distance[j] = sum;						// if new path is shorter, set new shorter distance
-					// new path string = path from source node to index node + path from index node to destination node:
+																					// new path string = path from source node to index node + path from index node to destination node:
 					input_node[i].dijkstra_path[j] = input_node[i].dijkstra_path[index] + " - " + input_node[index].dijkstra_path[j];
 				}
 			}					//finished looping thru each node as destination

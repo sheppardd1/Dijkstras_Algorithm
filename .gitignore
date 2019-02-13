@@ -1,6 +1,7 @@
 /*
 !README
-!/Project/main.cpp
+Dijkstra/*
+!Dijkstra/Dijkstra.cpp
 *.ini
 *.ilk
 *.pdb
