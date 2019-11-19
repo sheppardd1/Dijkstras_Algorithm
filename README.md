@@ -3,9 +3,9 @@
 ### Purpose
 The algorithm is designed for finding the shortest distance between two nodes in a graph. It is an implementation of Dijkstra's Algorithm.
 ### Files
-* Visual Studio Implementation: "Dijkstra/Dijkstra.cpp"
-* Linux (Ubuntu) Implementation: "Linux" folder
-* Windows Installation Files: "Windows Installer" folder.
+* Visual Studio Implementation: [Dijkstra/Dijkstra.cpp](Dijkstra/Dijkstra.cpp)
+* Linux (Ubuntu) Implementation: [Linux](Linux) folder
+* Windows Installation Files: [Windows Installer](Windows_Installer) folder.
 ### Running the program
 * Windows: A Windows installer is provided in the "Windows Installer" folder. Download this folder and run "setup.exe" to install the program on your PC.
 * Linux (Ubuntu): An executable file called "Program.out" can be found in the "Linux" folder. This file can be run by typing ./Program.out in the terminal (once the terminal is open in the directory of the .out file). To recompile with g++, download entire Linux folder, and type "make" in the terminal.
@@ -20,6 +20,6 @@ On startup, the program prompts for names of each node. After entering each node
 * The overall implementation uses a vector of nodes.
   * Example of syntax: node_name[2].direct_distance[3] is the distance from the 3rd node to the 4th node
 ## Dependencies
-* This project requires a minimum of C++ 11 when compiling (with g++ use command -std=c++11) for the stof() function.
+* This project requires a minimum of C++ 11 when compiling (with g++, use command -std=c++11) for the stof() function.
 ### Last Update:
 12 Feb 2019 - added [Windows Installer](Windows_Installer)
