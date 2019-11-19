@@ -22,4 +22,4 @@ On startup, the program prompts for names of each node. After entering each node
 ## Dependencies
 * This project requires a minimum of C++ 11 when compiling (with g++ use command -std=c++11) for the stof() function.
 ### Last Update:
-12 Feb 2019 - added Windows Installer
+12 Feb 2019 - added Windows Installer [a relative link](setup.exe)
