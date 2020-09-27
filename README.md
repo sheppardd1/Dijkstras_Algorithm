@@ -24,5 +24,5 @@ string name;                       // name of the node
 ## Dependencies
 * This project requires a minimum of C++ 11 when compiling (with g++, use command -std=c++11) for the stof() function.
 ### Last Update:
-12 Feb 2019 - added [Windows Installer](Windows_Installer)
-27 September 2020 - made some corrections and formatting changes to README.md
+* 12 Feb 2019 - added [Windows Installer](Windows_Installer)
+* 27 September 2020 - made some corrections and formatting changes to README.md
