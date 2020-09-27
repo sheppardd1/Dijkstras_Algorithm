@@ -14,10 +14,10 @@ On startup, the program prompts for names of each node. After entering each node
 ### Implementation Details:
 * Nodes are defined as a struct with 4 elements:<br />
 ```
-  vector <float> direct_distance;	 	  // direct_distance[i] is direct distance from current node to node i
-  vector <float> dijkstra_distance;	  // dijkstra_distance[i] is shortest distance from current node to node i
-  vector <string> dijkstra_path;		    // dijkstra_path[i] is the shortest path from current node to node i (as a string)
-  string name;						                  // name of the node
+vector <float> direct_distance;    // direct_distance[i] is direct distance from current node to node i
+vector <float> dijkstra_distance;  // dijkstra_distance[i] is shortest distance from current node to node i
+vector <string> dijkstra_path;     // dijkstra_path[i] is the shortest path from current node to node i (as a string)
+string name;                       // name of the node
 ```
 * The overall implementation uses a vector of nodes.
   * Example of syntax: node_name[2].direct_distance[3] is the distance from the 3rd node to the 4th node
